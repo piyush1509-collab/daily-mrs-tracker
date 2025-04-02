@@ -83,7 +83,30 @@ def get_consumption_history():
         print("Error fetching consumption history:", str(e))
         return jsonify({"error": str(e)}), 500
 
+@app.route('/get-item-code', methods=['GET'])
+def get_item_code():
+    item_name = request.args.get('item_name', '').strip()
+    print(f"Item Name received: {item_name}") #debugging
+    if not item_name:
+        return jsonify({'item_code': ''})
 
+    try:
+        inventory_sheet = sh.worksheet("Inventory")
+        inventory_data = inventory_sheet.get_all_records()
+        print(f"Inventory data: {inventory_data}") #debugging
+
+        for row in inventory_data:
+            print(f"checking row: {row.get('Item Name', '').strip().lower()}") #debugging
+            if row.get('Item Name', '').strip().lower() == item_name.lower():
+                print(f"Item code found: {row.get('Item Code', '')}") #debugging
+                return jsonify({'item_code': row.get('Item Code', '')})
+
+        print("Item not found") #debugging
+        return jsonify({'item_code': ''})
+    except Exception as e:
+        print("Error fetching item code:", str(e))
+        return jsonify({'item_code': ''})
+        
 # Log Tool Entry (Default: Pending Status)
 @app.route('/log-tool', methods=['POST'])
 def log_tool():
