@@ -71,121 +71,125 @@
         function addRow() {
             let table = document.getElementById("itemTable");
             let row = table.insertRow(-1);
-           row.innerHTML = `<td>${table.rows.length - 1}</td>
-    <td><input type='text' name='item_name' list='item-names'></td>
-    <td><input type='text' name='item_code'></td>
-    <td><input type='number' name='quantity'></td>
-    <td><select name='unit'><option value='kg'>Kg</option><option value='litre'>Litre</option><option value='Meter'>Meter</option><option value='Nos'>Nos</option></select></td>`;
-        document.addEventListener('DOMContentLoaded', function() {
-    fetch('/get-item-names')
-        .then(response => response.json())
-        .then(itemNames => {
-            const itemInputs = document.querySelectorAll('input[name="item_name"]');
-            itemInputs.forEach(input => {
-                let datalist = document.createElement("datalist");
-                datalist.id = "item-names";
-                document.body.appendChild(datalist);
-                itemNames.forEach(name => {
-                    let option = document.createElement("option");
-                    option.value = name;
-                    datalist.appendChild(option);
-                });
-                input.setAttribute("list", "item-names");
-            });
-        })
-        .catch(error => console.error('Error fetching item names:', error));
-});
-        function fetchAreas(){
-    fetch('/get-areas')
-    .then(response => response.json())
-    .then(areas => {
-        const select = document.querySelector(".controls select");
-        select.innerHTML = "";
-        areas.forEach(area => {
-            const option = document.createElement("option");
-            option.value = area;
-            option.textContent = area;
-            select.appendChild(option);
-        })
-    })
-    .catch(error => console.error("error fetching areas", error));
-}
-
-document.addEventListener('DOMContentLoaded', fetchAreas);
-
-        document.addEventListener('DOMContentLoaded', function() {
-  const logConsumptionButton = document.querySelector('button:nth-of-type(2)');
-
-  logConsumptionButton.addEventListener('click', function() {
-    const table = document.getElementById('itemTable');
-    const rows = table.rows;
-    const items = [];
-
-    for (let i = 1; i < rows.length; i++) {
-      const itemName = rows[i].cells[1].querySelector('input').value;
-      const itemCode = rows[i].cells[2].querySelector('input').value;
-      const quantity = rows[i].cells[3].querySelector('input').value;
-      const unit = rows[i].cells[4].querySelector('select').value;
-      items.push({
-        'Item Name': itemName,
-        'Item Code': itemCode,
-        'Quantity': quantity,
-        'Unit': unit
-      });
-    }
-
-    const date = document.querySelector('input[name="date"]').value;
-    const area = document.querySelector('.controls select').value;
-    const incharge = document.querySelectorAll('.controls input[type="text"]')[0].value;
-    const shift = document.querySelectorAll('.controls select')[1].value;
-    const receiver = document.querySelectorAll('.controls input[type="text"]')[1].value;
-    const contractor = document.querySelectorAll('.controls input[type="text"]')[2].value;
-
-    const data = {
-      items: items,
-      Date: date,
-      'Consumed Area': area,
-      'Area-Incharge': incharge,
-      Shift: shift,
-      Receiver: receiver,
-      Contractor: contractor
-    };
-
-    fetch('/log-consumption', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(data)
-    })
-    .then(response => response.json())
-    .then(result => {
-      console.log('Success:', result);
-      alert('Consumption logged successfully!');
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      alert('Failed to log consumption. Please try again.');
-    });
-  });
-});
-        document.addEventListener('DOMContentLoaded', function() {
-    const resetButton = document.querySelector('button:nth-of-type(3)');
-
-    resetButton.addEventListener('click', function() {
-        document.querySelector('input[name="date"]').value = '';
-        const itemRows = document.querySelectorAll('#itemTable tr');
-        for (let i = 1; i < itemRows.length; i++) {
-            itemRows[i].cells[1].querySelector('input').value = '';
-            itemRows[i].cells[2].querySelector('input').value = '';
-            itemRows[i].cells[3].querySelector('input').value = '';
+            row.innerHTML = `<td>${table.rows.length - 1}</td>
+                <td><input type='text' name='item_name' list='item-names'></td>
+                <td><input type='text' name='item_code'></td>
+                <td><input type='number' name='quantity'></td>
+                <td><select name='unit'><option value='kg'>Kg</option><option value='litre'>Litre</option><option value='Meter'>Meter</option><option value='Nos'>Nos</option></select></td>`;
         }
-        const selects = document.querySelectorAll('.controls select');
-        selects.forEach(select => select.selectedIndex = 0);
-        const textInputs = document.querySelectorAll('.controls input[type="text"]');
-        textInputs.forEach(input => input.value = '');
-    });
-});
+
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('/get-item-names')
+                .then(response => response.json())
+                .then(itemNames => {
+                    const itemInputs = document.querySelectorAll('input[name="item_name"]');
+                    itemInputs.forEach(input => {
+                        let datalist = document.createElement("datalist");
+                        datalist.id = "item-names";
+                        document.body.appendChild(datalist);
+                        itemNames.forEach(name => {
+                            let option = document.createElement("option");
+                            option.value = name;
+                            datalist.appendChild(option);
+                        });
+                        input.setAttribute("list", "item-names");
+                    });
+                })
+                .catch(error => console.error('Error fetching item names:', error));
+        });
+
+        function fetchAreas(){
+            fetch('/get-areas')
+                .then(response => response.json())
+                .then(areas => {
+                    const select = document.querySelector(".controls select");
+                    select.innerHTML = "";
+                    areas.forEach(area => {
+                        const option = document.createElement("option");
+                        option.value = area;
+                        option.textContent = area;
+                        select.appendChild(option);
+                    });
+                })
+                .catch(error => console.error("error fetching areas", error));
+        }
+
+        document.addEventListener('DOMContentLoaded', fetchAreas);
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const logConsumptionButton = document.querySelector('button:nth-of-type(2)');
+
+            logConsumptionButton.addEventListener('click', function() {
+                const table = document.getElementById('itemTable');
+                const rows = table.rows;
+                const items = [];
+
+                for (let i = 1; i < rows.length; i++) {
+                    const itemName = rows[i].cells[1].querySelector('input').value;
+                    const itemCode = rows[i].cells[2].querySelector('input').value;
+                    const quantity = rows[i].cells[3].querySelector('input').value;
+                    const unit = rows[i].cells[4].querySelector('select').value;
+                    items.push({
+                        'Item Name': itemName,
+                        'Item Code': itemCode,
+                        'Quantity': quantity,
+                        'Unit': unit
+                    });
+                }
+
+                const date = document.querySelector('input[name="date"]').value;
+                const area = document.querySelector('.controls select').value;
+                const incharge = document.querySelectorAll('.controls input[type="text"]')[0].value;
+                const shift = document.querySelectorAll('.controls select')[1].value;
+                const receiver = document.querySelectorAll('.controls input[type="text"]')[1].value;
+                const contractor = document.querySelectorAll('.controls input[type="text"]')[2].value;
+
+                const data = {
+                    items: items,
+                    Date: date,
+                    'Consumed Area': area,
+                    'Area-Incharge': incharge,
+                    Shift: shift,
+                    Receiver: receiver,
+                    Contractor: contractor
+                };
+
+                fetch('/log-consumption', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.json())
+                .then(result => {
+                    console.log('Success:', result);
+                    alert('Consumption logged successfully!');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to log consumption. Please try again.');
+                });
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const resetButton = document.querySelector('button:nth-of-type(3)');
+
+            resetButton.addEventListener('click', function() {
+                document.querySelector('input[name="date"]').value = '';
+                const itemRows = document.querySelectorAll('#itemTable tr');
+                for (let i = 1; i < itemRows.length; i++) {
+                    itemRows[i].cells[1].querySelector('input').value = '';
+                    itemRows[i].cells[2].querySelector('input').value = '';
+                    itemRows[i].cells[3].querySelector('input').value = '';
+                }
+                const selects = document.querySelectorAll('.controls select');
+                selects.forEach(select => select.selectedIndex = 0);
+                const textInputs = document.querySelectorAll('.controls input[type="text"]');
+                textInputs.forEach(input => input.value = '');
+            });
+        });
     </script>
 </head>
 <body>
