@@ -90,26 +90,53 @@
     </div>
 
     <script>
-        function filterRecords() {
-            let date = document.getElementById("filterDate").value;
-            let area = document.getElementById("filterArea").value;
-            
-            let table = document.getElementById("historyTable");
-            let rows = table.getElementsByTagName("tr");
-            
-            for (let i = 1; i < rows.length; i++) {
-                let cells = rows[i].getElementsByTagName("td");
-                let rowDate = cells[0]?.innerText;
-                let rowArea = cells[5]?.innerText;
-                
-                let match = true;
-                if (date && rowDate !== date) match = false;
-                if (area && rowArea !== area) match = false;
-                
-                rows[i].style.display = match ? "" : "none";
-            }
+      function filterRecords() {
+  const date = document.getElementById('filterDate').value;
+  const area = document.getElementById('filterArea').value;
+  fetchConsumptionHistory(date, area);
+}
+
+function fetchConsumptionHistory(date = '', area = '') {
+    let url = '/consumption-history';
+    if(date || area){
+        url += "?";
+        if(date){
+            url += `date=${date}&`
         }
-        
+        if(area){
+            url += `area=${area}`
+        }
+    }
+
+  fetch(url)
+    .then(response => response.json())
+    .then(data => {
+      const table = document.getElementById('historyTable');
+      table.innerHTML = `
+        <tr>
+          <th>Date</th>
+          <th>Item Name</th>
+          <th>Item Code</th>
+          <th>Quantity</th>
+          <th>Unit</th>
+          <th>Consumed Area</th>
+          <th>Shift</th>
+          <th>Area Incharge</th>
+          <th>Receiver</th>
+          <th>Contractor</th>
+        </tr>
+      `;
+
+      data.forEach(record => {
+        const row = table.insertRow();
+        for (let key in record) {
+          const cell = row.insertCell();
+          cell.textContent = record[key];
+        }
+      });
+    })
+    .catch(error => console.error('Error fetching consumption history:', error));
+}
         function downloadData() {
             let table = document.getElementById("historyTable");
             let rows = table.getElementsByTagName("tr");
@@ -131,6 +158,38 @@
             document.body.appendChild(link);
             link.click();
         }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+    fetch('/consumption-history')
+        .then(response => response.json())
+        .then(data => {
+            const table = document.getElementById('historyTable');
+            data.forEach(record => {
+                const row = table.insertRow();
+                for (let key in record) {
+                    const cell = row.insertCell();
+                    cell.textContent = record[key];
+                }
+            });
+        })
+        .catch(error => console.error('Error fetching consumption history:', error));
+});
+        function fetchAreas(){
+    fetch('/get-areas')
+    .then(response => response.json())
+    .then(areas => {
+        const select = document.getElementById("filterArea");
+        areas.forEach(area => {
+            const option = document.createElement("option");
+            option.value = area;
+            option.textContent = area;
+            select.appendChild(option);
+        })
+    })
+    .catch(error => console.error("error fetching areas", error));
+}
+
+document.addEventListener('DOMContentLoaded', fetchAreas);
     </script>
 </body>
 </html>
