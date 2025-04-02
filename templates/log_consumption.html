@@ -71,12 +71,11 @@
         function addRow() {
             let table = document.getElementById("itemTable");
             let row = table.insertRow(-1);
-            row.innerHTML = `<td>${table.rows.length - 1}</td>
-                <td><input type='text' name='item_name'></td>
-                <td><input type='text' name='item_code'></td>
-                <td><input type='number' name='quantity'></td>
-                <td><select name='unit'><option value='kg'>Kg</option><option value='litre'>Litre</option><option value='Meter'>Meter</option><option value='Nos'>Nos</option></select></td>`;
-        }
+           row.innerHTML = `<td>${table.rows.length - 1}</td>
+    <td><input type='text' name='item_name' list='item-names'></td>
+    <td><input type='text' name='item_code'></td>
+    <td><input type='number' name='quantity'></td>
+    <td><select name='unit'><option value='kg'>Kg</option><option value='litre'>Litre</option><option value='Meter'>Meter</option><option value='Nos'>Nos</option></select></td>`;
         document.addEventListener('DOMContentLoaded', function() {
     fetch('/get-item-names')
         .then(response => response.json())
@@ -203,7 +202,7 @@ document.addEventListener('DOMContentLoaded', fetchAreas);
             </tr>
             <tr>
                 <td>1</td>
-                <td><input type="text" name="item_name"></td>
+                <td><input type="text" name="item_name" list="item-names"></td>
                 <td><input type="text" name="item_code"></td>
                 <td><input type="number" name="quantity"></td>
                 <td><select name="unit"><option value="kg">Kg</option><option value="litre">Litre</option><option value='Meter'>Meter</option><option value='Nos'>Nos</option></select></td>
