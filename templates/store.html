@@ -96,82 +96,177 @@
     </div>
 
     <script>
-    let passwordEntered = false;
+        let passwordEntered = false;
 
-    function enterPassword() {
-        let passwordInput = document.getElementById("password");
-        let password = passwordInput.value.trim();
+        function enterPassword() {
+            let passwordInput = document.getElementById("password");
+            let password = passwordInput.value.trim();
 
-        if (password === "tool") {
-            document.getElementById("passwordModal").style.display = "none";
-            document.getElementById("storeOptions").classList.remove("hidden");
-            passwordEntered = true;
-        } else {
-            alert("Incorrect password!");
-            passwordInput.value = "";
+            if (password === "tool") {
+                document.getElementById("passwordModal").style.display = "none";
+                document.getElementById("storeOptions").classList.remove("hidden");
+                passwordEntered = true;
+            } else {
+                alert("Incorrect password!");
+                passwordInput.value = "";
+            }
         }
-    }
 
-    function showPasswordModal() {
-        document.getElementById("passwordModal").style.display = "block";
-        document.getElementById("storeOptions").classList.add("hidden");
-        document.getElementById("logToolSection").style.display = "none";
-        document.getElementById("modifyToolStatusSection").style.display = "none";
-        passwordEntered = false;
-    }
-
-    function showStoreOptions() {
-        if (passwordEntered) {
-            document.getElementById("storeOptions").classList.remove("hidden");
+        function showPasswordModal() {
+            document.getElementById("passwordModal").style.display = "block";
+            document.getElementById("storeOptions").classList.add("hidden");
             document.getElementById("logToolSection").style.display = "none";
             document.getElementById("modifyToolStatusSection").style.display = "none";
-        } else {
-            showPasswordModal();
+            passwordEntered = false;
         }
-    }
 
-    function showLogToolEntry() {
-        document.getElementById("storeOptions").style.display = "none";
-        document.getElementById("modifyToolStatusSection").style.display = "none";
-        document.getElementById("logToolSection").style.display = "block";
-    }
+        function showStoreOptions() {
+            if (passwordEntered) {
+                document.getElementById("storeOptions").classList.remove("hidden");
+                document.getElementById("logToolSection").style.display = "none";
+                document.getElementById("modifyToolStatusSection").style.display = "none";
+            } else {
+                showPasswordModal();
+            }
+        }
 
-    function showModifyToolStatus() {
-        document.getElementById("storeOptions").style.display = "none";
-        document.getElementById("logToolSection").style.display = "none";
-        document.getElementById("modifyToolStatusSection").style.display = "block";
-        fetchStorePendingTools();
-    }
+        function showLogToolEntry() {
+            document.getElementById("storeOptions").classList.add("hidden");
+            document.getElementById("modifyToolStatusSection").style.display = "none";
+            document.getElementById("logToolSection").style.display = "block";
+        }
 
-    function fetchStorePendingTools() {
-        // ... (rest of the fetchStorePendingTools function remains the same)
-    }
+        function showModifyToolStatus() {
+            document.getElementById("storeOptions").classList.add("hidden");
+            document.getElementById("logToolSection").style.display = "none";
+            document.getElementById("modifyToolStatusSection").style.display = "block";
+            fetchStorePendingTools();
+        }
 
-    function saveToolStatus(toolName, button) {
-        // ... (rest of the saveToolStatus function remains the same)
-    }
+        function fetchStorePendingTools() {
+            let selectedArea = document.getElementById("areaFilter").value;
 
-    function logTool() {
-        // ... (rest of the logTool function remains the same)
-    }
+            fetch('/get-pending-tools')
+                .then(response => response.json())
+                .then(data => {
+                    let tableBody = document.getElementById("pendingToolsTable");
+                    tableBody.innerHTML = "";
 
-    function modifyToolStatus(toolName, newStatus) {
-        // ... (rest of the modifyToolStatus function remains the same)
-    }
+                    data.forEach(row => {
+                        let toolName = row["Tool Name"] || "N/A";
+                        let area = row["Area"] || "N/A";
+                        let inCharge = row["In-Charge"] || "N/A";
+                        let receiverName = row["Receiver Name"] || "N/A";
+                        let contractorName = row["Contractor Name"] || "N/A";
+                        let dateIssued = row["Date Issued"] || "N/A";
+                        let status = row["Status"] || "N/A";
 
-    let toolNames = [];
+                        if (selectedArea && area !== selectedArea) {
+                            return;
+                        }
 
-    function fetchToolNames() {
-        // ... (rest of the fetchToolNames function remains the same)
-    }
+                        let newRow = `<tr>
+                            <td class="p-3">${toolName}</td>
+                            <td class="p-3">${area}</td>
+                            <td class="p-3">${inCharge}</td>
+                            <td class="p-3">${receiverName}</td>
+                            <td class="p-3">${contractorName}</td>
+                            <td class="p-3">${dateIssued}</td>
+                            <td class="p-3">
+                                <select class="status-dropdown bg-gray-700 text-white p-2 rounded">
+                                    <option value="Pending" ${status === "Pending" ? "selected" : ""}>Pending</option>
+                                    <option value="Returned">Returned</option>
+                                    <option value="Permanently Issued">Permanently Issued</option>
+                                </select>
+                            </td>
+                            <td class="p-3"><input type="date" class="return-date bg-gray-700 text-white p-2 rounded"></td>
+                            <td class="p-3"><button class="bg-green-500 px-4 py-2 rounded-lg hover:bg-green-600" onclick="saveToolStatus('${toolName}', this)">Save Status</button></td>
+                        </tr>`;
+                        tableBody.innerHTML += newRow;
+                    });
+                })
+                .catch(error => console.error("Error fetching store pending tools:", error));
+        }
 
-    function suggestTools() {
-        // ... (rest of the suggestTools function remains the same)
-    }
+        function saveToolStatus(toolName, button) {
+            let row = button.parentNode.parentNode;
+            let status = row.querySelector(".status-dropdown").value;
+            let returnDate = row.querySelector(".return-date").value;
 
-    window.onload = function() {
-        fetchToolNames();
-    };
-</script>
+            fetch('/modify-tool-status', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ "Tool Name": toolName, "Status": status, "Return Date": returnDate })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                fetchStorePendingTools();
+            })
+            .catch(error => console.error("Error modifying tool status:", error));
+        }
+
+        function logTool() {
+            let toolData = {
+                "Tool Name": document.getElementById("toolName").value,
+                "Area": document.getElementById("area").value,
+                "In-Charge": document.getElementById("inCharge").value,
+                "Receiver Name": document.getElementById("receiverName").value,
+                "Contractor Name": document.getElementById("contractorName").value,
+                "Date Issued": document.getElementById("dateIssued").value
+            };
+
+            fetch('/log-tool', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(toolData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                document.getElementById("logToolForm").reset();
+            })
+            .catch(error => console.error("Error logging tool:", error));
+        }
+
+        let toolNames = [];
+
+        function fetchToolNames() {
+            fetch('/get-tools')
+                .then(response => response.json())
+                .then(data => {
+                    toolNames = data;
+                })
+                .catch(error => console.error("Error fetching tool names:", error));
+        }
+
+        function suggestTools() {
+            let input = document.getElementById("toolName").value.toLowerCase();
+            let suggestions = document.getElementById("toolSuggestions");
+            suggestions.innerHTML = "";
+
+            toolNames.forEach(tool => {
+                if (tool.toLowerCase().includes(input)) {
+                    let option = document.createElement("option");
+                    option.value = tool;
+                    suggestions.appendChild(option);
+                }
+            });
+        }
+
+        window.onload = function() {
+            fetchToolNames();
+
+            const dateInput = document.getElementById("dateIssued");
+            if (dateInput) {
+                const today = new Date();
+                const year = today.getFullYear();
+                const month = String(today.getMonth() + 1).padStart(2, '0');
+                const day = String(today.getDate()).padStart(2, '0');
+                const formattedDate = `${year}-${month}-${day}`;
+                dateInput.value = formattedDate;
+            }
+        };
+    </script>
 </body>
 </html>
