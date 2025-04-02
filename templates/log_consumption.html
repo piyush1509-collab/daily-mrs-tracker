@@ -93,6 +93,29 @@
                             datalist.appendChild(option);
                         });
                         input.setAttribute("list", "item-names");
+                         input.addEventListener('change', function() {
+                            const itemName = this.value;
+                            const row = this.closest('tr');
+                            const itemCodeInput = row.querySelector('input[name="item_code"]');
+
+                            if (itemName) {
+                                fetch(`/get-item-code?item_name=${encodeURIComponent(itemName)}`)
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.item_code) {
+                                            itemCodeInput.value = data.item_code;
+                                        } else {
+                                            itemCodeInput.value = '';
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error('Error fetching item code:', error);
+                                        itemCodeInput.value = '';
+                                    });
+                            } else {
+                                itemCodeInput.value = '';
+                            }
+                        });
                     });
                 })
                 .catch(error => console.error('Error fetching item names:', error));
