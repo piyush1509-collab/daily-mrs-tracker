@@ -58,10 +58,10 @@
         <h2>Consumption History</h2>
         <div>
             <label>Date: <input type="date" id="filterDate"></label>
-            <label>Consumed Area: 
+            <label>Consumed Area:
                 <select id="filterArea">
                     <option value="">All</option>
-                    <option>PUMP HOUSE</option> 
+                    <option>PUMP HOUSE</option>
                     <option>RO PLANT</option>
                     <option>GASZONE</option>
                     <option>FURNACE</option>
@@ -90,112 +90,114 @@
     </div>
 
     <script>
-    function filterRecords() {
-        const date = document.getElementById('filterDate').value;
-        const area = document.getElementById('filterArea').value;
-        fetchConsumptionHistory(date, area);
-    }
-
-    function fetchConsumptionHistory(date = '', area = '') {
-        let url = '/consumption-history';
-        if (date || area) {
-            url += "?";
-            if (date) {
-                url += `date=${date}&`;
-            }
-            if (area) {
-                url += `area=${area}`;
-            }
+        function filterRecords() {
+            const date = document.getElementById('filterDate').value;
+            const area = document.getElementById('filterArea').value;
+            fetchConsumptionHistory(date, area);
         }
 
-        fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                const table = document.getElementById('historyTable');
-                table.innerHTML = `
-                    <tr>
-                        <th>Date</th>
-                        <th>Item Name</th>
-                        <th>Item Code</th>
-                        <th>Quantity</th>
-                        <th>Unit</th>
-                        <th>Consumed Area</th>
-                        <th>Shift</th>
-                        <th>Area Incharge</th>
-                        <th>Receiver</th>
-                        <th>Contractor</th>
-                    </tr>
-                `;
-
-                const columnOrder = ['Date', 'Item Name', 'Item Code', 'Quantity', 'Unit', 'Consumed Area', 'Shift', 'Area Incharge', 'Receiver', 'Contractor'];
-
-                data.forEach(record => {
-                    const row = table.insertRow();
-                    columnOrder.forEach(key => {
-                        const cell = row.insertCell();
-                        cell.textContent = record[key];
-                    });
-                });
-            })
-            .catch(error => console.error('Error fetching consumption history:', error));
-    }
-
-    function downloadData() {
-        let table = document.getElementById("historyTable");
-        let rows = table.getElementsByTagName("tr");
-        let csvContent = "data:text/csv;charset=utf-8,";
-
-        for (let row of rows) {
-            let cells = row.getElementsByTagName("td");
-            let rowData = [];
-            for (let cell of cells) {
-                rowData.push(cell.innerText);
+        function fetchConsumptionHistory(date = '', area = '') {
+            let url = '/consumption-history';
+            if (date || area) {
+                url += "?";
+                if (date) {
+                    url += `date=${date}&`;
+                }
+                if (area) {
+                    url += `area=${area}`;
+                }
             }
-            csvContent += rowData.join(",") + "\n";
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    const table = document.getElementById('historyTable');
+                    table.innerHTML = `
+                        <tr>
+                            <th>Date</th>
+                            <th>Item Name</th>
+                            <th>Item Code</th>
+                            <th>Quantity</th>
+                            <th>Unit</th>
+                            <th>Consumed Area</th>
+                            <th>Shift</th>
+                            <th>Area Incharge</th>
+                            <th>Receiver</th>
+                            <th>Contractor</th>
+                        </tr>
+                    `;
+
+                    // Maintain the column order from the older code, adjust keys if needed.
+                    const columnOrder = ['Date', 'Item Name', 'Item Code', 'Quantity', 'Unit', 'Consumed Area', 'Shift', 'Area-Incharge', 'Receiver', 'Contractor']; // Adjust keys if necessary
+
+                    data.forEach(record => {
+                        const row = table.insertRow();
+                        columnOrder.forEach(key => {
+                            const cell = row.insertCell();
+                            cell.textContent = record[key];
+                        });
+                    });
+                })
+                .catch(error => console.error('Error fetching consumption history:', error));
         }
 
-        let encodedUri = encodeURI(csvContent);
-        let link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", "consumption_history.csv");
-        document.body.appendChild(link);
-        link.click();
-    }
+        function downloadData() {
+            let table = document.getElementById("historyTable");
+            let rows = table.getElementsByTagName("tr");
+            let csvContent = "data:text/csv;charset=utf-8,";
 
-    document.addEventListener('DOMContentLoaded', function() {
-        fetch('/consumption-history')
-            .then(response => response.json())
-            .then(data => {
-                const table = document.getElementById('historyTable');
-                const columnOrder = ['Date', 'Item Name', 'Item Code', 'Quantity', 'Unit', 'Consumed Area', 'Shift', 'Area Incharge', 'Receiver', 'Contractor'];
+            for (let row of rows) {
+                let cells = row.getElementsByTagName("td");
+                let rowData = [];
+                for (let cell of cells) {
+                    rowData.push(cell.innerText);
+                }
+                csvContent += rowData.join(",") + "\n";
+            }
 
-                data.forEach(record => {
-                    const row = table.insertRow();
-                    columnOrder.forEach(key => {
-                        const cell = row.insertCell();
-                        cell.textContent = record[key];
+            let encodedUri = encodeURI(csvContent);
+            let link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "consumption_history.csv");
+            document.body.appendChild(link);
+            link.click();
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('/consumption-history')
+                .then(response => response.json())
+                .then(data => {
+                    const table = document.getElementById('historyTable');
+                    // Maintain the column order from the older code, adjust keys if needed.
+                    const columnOrder = ['Date', 'Item Name', 'Item Code', 'Quantity', 'Unit', 'Consumed Area', 'Shift', 'Area-Incharge', 'Receiver', 'Contractor']; // Adjust keys if necessary
+
+                    data.forEach(record => {
+                        const row = table.insertRow();
+                        columnOrder.forEach(key => {
+                            const cell = row.insertCell();
+                            cell.textContent = record[key];
+                        });
                     });
                 })
-            })
-            .catch(error => console.error('Error fetching consumption history:', error));
-    });
+                .catch(error => console.error('Error fetching consumption history:', error));
+        });
 
-    function fetchAreas() {
-        fetch('/get-areas')
-            .then(response => response.json())
-            .then(areas => {
-                const select = document.getElementById("filterArea");
-                areas.forEach(area => {
-                    const option = document.createElement("option");
-                    option.value = area;
-                    option.textContent = area;
-                    select.appendChild(option);
+        function fetchAreas() {
+            fetch('/get-areas')
+                .then(response => response.json())
+                .then(areas => {
+                    const select = document.getElementById("filterArea");
+                    areas.forEach(area => {
+                        const option = document.createElement("option");
+                        option.value = area;
+                        option.textContent = area;
+                        select.appendChild(option);
+                    });
                 })
-            })
-            .catch(error => console.error("error fetching areas", error));
-    }
+                .catch(error => console.error("error fetching areas", error));
+        }
 
-    document.addEventListener('DOMContentLoaded', fetchAreas);
-</script>
+        document.addEventListener('DOMContentLoaded', fetchAreas);
+    </script>
 </body>
 </html>
