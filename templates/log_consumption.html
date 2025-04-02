@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log Consumption</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #121212;
+            color: white;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            border: 2px solid #444;
+            padding: 20px;
+            background-color: #1e1e1e;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #2a2a2a;
+        }
+        th, td {
+            border: 1px solid #444;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #333;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            background-color: #333;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+        .controls label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+    <script>
+        function addRow() {
+            let table = document.getElementById("itemTable");
+            let row = table.insertRow(-1);
+            row.innerHTML = `<td>${table.rows.length - 1}</td>
+                <td><input type='text' name='item_name'></td>
+                <td><input type='text' name='item_code'></td>
+                <td><input type='number' name='quantity'></td>
+                <td><select name='unit'><option value='kg'>Kg</option><option value='litre'>Litre</option><option value='Meter'>Meter</option><option value='Nos'>Nos</option></select></td>`;
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h2>Material Requisition Slip</h2>
+        <label>Date: <input type="date" name="date"></label>
+        <table id="itemTable">
+            <tr>
+                <th>S.L NO</th>
+                <th>Item Name</th>
+                <th>Item Code</th>
+                <th>Quantity</th>
+                <th>Unit</th>
+            </tr>
+            <tr>
+                <td>1</td>
+                <td><input type="text" name="item_name"></td>
+                <td><input type="text" name="item_code"></td>
+                <td><input type="number" name="quantity"></td>
+                <td><select name="unit"><option value="kg">Kg</option><option value="litre">Litre</option><option value='Meter'>Meter</option><option value='Nos'>Nos</option></select></td>
+            </tr>
+        </table>
+        <button onclick="addRow()">ADD MORE ITEMS</button>
+        <div class="controls">
+            <label>Area: <select><option>PUMP HOUSE</option><option>RO PLANT</option><option>GASZONE</option><option>FURNACE</option><option>MATERIAL HANDLING</option><option>ELECTRICAL</option><option>OPERATION</option></select></label>
+            <label>Incharge Name: <input type="text"></label>
+            <label>Shift: <select><option>A</option><option>B</option><option>C</option></select></label>
+            <label>Receiver: <input type="text"></label>
+            <label>Contractor: <input type="text"></label>
+        </div>
+        <button>LOG CONSUMPTION</button>
+        <button>RESET</button>
+    </div>
+</body>
+</html>
