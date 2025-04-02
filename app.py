@@ -40,20 +40,27 @@ def user():
 def get_items():
     try:
         items_data = inventory_sheet.get_all_records()
+        print("Fetched Items:", items_data)  # Debugging line
         return jsonify(items_data)
     except Exception as e:
+        print("Error fetching items:", str(e))
         return jsonify({"error": str(e)}), 500
+
 
 # API to get consumption history
 @app.route('/consumption-history', methods=['GET'])
 def get_consumption_history():
     try:
-        sheet = sh.worksheet("Consumption Log")  # Ensure correct sheet name
-        records = sheet.get_all_records()
+        records = consumption_sheet.get_all_records()
+        print("Fetched Consumption Records:", records)  # Debugging line
 
         # Extract query parameters
         area_filter = request.args.get("area", "").strip()
         date_filter = request.args.get("date", "").strip()
+
+        # Check if column names are correct
+        if not records or "Consumed Area" not in records[0] or "Date" not in records[0]:
+            return jsonify({"error": "Column names mismatch in Google Sheet"}), 500
 
         # Filter records based on area & date
         filtered_records = [
@@ -62,10 +69,13 @@ def get_consumption_history():
             and (not date_filter or record.get("Date", "").strip() == date_filter)
         ]
 
+        print("Filtered Consumption Records:", filtered_records)  # Debugging
         return jsonify(filtered_records)
+
     except Exception as e:
         print("Error fetching consumption history:", str(e))
         return jsonify({"error": str(e)}), 500
+
 
 # Log Tool Entry (Default: Pending Status)
 @app.route('/log-tool', methods=['POST'])
