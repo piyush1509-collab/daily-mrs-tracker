@@ -1,250 +1,147 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Log Consumption</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: #121212;
-            color: white;
-        }
-        .container {
-            width: 80%;
-            margin: auto;
-            border: 2px solid #444;
-            padding: 20px;
-            background-color: #1e1e1e;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background-color: #2a2a2a;
-        }
-        th, td {
-            border: 1px solid #444;
-            padding: 10px;
-            text-align: center;
-        }
-        th {
-            background-color: #333;
-        }
-        input, select {
-            width: 100%;
-            padding: 8px;
-            background-color: #333;
-            color: white;
-            border: 1px solid #555;
-            border-radius: 4px;
-            text-align: center;
-        }
-        .controls {
-            margin-top: 20px;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 10px;
-        }
-        .controls label {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        button {
-            padding: 10px 20px;
-            margin: 5px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-    </style>
-    <script>
-        function addRow() {
-            let table = document.getElementById("itemTable");
-            let row = table.insertRow(-1);
-            row.innerHTML = `<td>${table.rows.length - 1}</td>
-                <td><input type='text' name='item_name' list='item-names'></td>
-                <td><input type='text' name='item_code'></td>
-                <td><input type='number' name='quantity'></td>
-                <td><select name='unit'><option value='kg'>Kg</option><option value='litre'>Litre</option><option value='Meter'>Meter</option><option value='Nos'>Nos</option></select></td>`;
-        }
+<script>
+    function addRow() {
+        let table = document.getElementById("itemTable");
+        let row = table.insertRow(-1);
+        row.innerHTML = `<td>${table.rows.length - 1}</td>
+            <td><input type='text' name='item_name' list='item-names'></td>
+            <td><input type='text' name='item_code'></td>
+            <td><input type='number' name='quantity'></td>
+            <td><select name='unit'><option value='kg'>Kg</option><option value='litre'>Litre</option><option value='Meter'>Meter</option><option value='Nos'>Nos</option></select></td>`;
+    }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            fetch('/get-item-names')
-                .then(response => response.json())
-                .then(itemNames => {
-                    const itemInputs = document.querySelectorAll('input[name="item_name"]');
-                    itemInputs.forEach(input => {
-                        let datalist = document.createElement("datalist");
-                        datalist.id = "item-names";
-                        document.body.appendChild(datalist);
-                        itemNames.forEach(name => {
-                            let option = document.createElement("option");
-                            option.value = name;
-                            datalist.appendChild(option);
-                        });
-                        input.setAttribute("list", "item-names");
-                         input.addEventListener('change', function() {
-                            const itemName = this.value;
-                            const row = this.closest('tr');
-                            const itemCodeInput = row.querySelector('input[name="item_code"]');
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch('/get-item-names')
+            .then(response => response.json())
+            .then(itemNames => {
+                const itemInputs = document.querySelectorAll('input[name="item_name"]');
+                itemInputs.forEach(input => {
+                    let datalist = document.createElement("datalist");
+                    datalist.id = "item-names";
+                    document.body.appendChild(datalist);
+                    itemNames.forEach(name => {
+                        let option = document.createElement("option");
+                        option.value = name;
+                        datalist.appendChild(option);
+                    });
+                    input.setAttribute("list", "item-names");
+                     input.addEventListener('input', function() { // Change 'change' to 'input'
+                        const itemName = this.value;
+                        const row = this.closest('tr');
+                        const itemCodeInput = row.querySelector('input[name="item_code"]');
 
-                            if (itemName) {
-                                fetch(`/get-item-code?item_name=${encodeURIComponent(itemName)}`)
-                                    .then(response => response.json())
-                                    .then(data => {
-                                        if (data.item_code) {
-                                            itemCodeInput.value = data.item_code;
-                                        } else {
-                                            itemCodeInput.value = '';
-                                        }
-                                    })
-                                    .catch(error => {
-                                        console.error('Error fetching item code:', error);
+                        if (itemName) {
+                            fetch(`/get-item-code?item_name=${encodeURIComponent(itemName)}`)
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.item_code) {
+                                        itemCodeInput.value = data.item_code;
+                                    } else {
                                         itemCodeInput.value = '';
-                                    });
-                            } else {
-                                itemCodeInput.value = '';
-                            }
-                        });
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error fetching item code:', error);
+                                    itemCodeInput.value = '';
+                                });
+                        } else {
+                            itemCodeInput.value = '';
+                        }
                     });
-                })
-                .catch(error => console.error('Error fetching item names:', error));
-        });
-
-        function fetchAreas(){
-            fetch('/get-areas')
-                .then(response => response.json())
-                .then(areas => {
-                    const select = document.querySelector(".controls select");
-                    select.innerHTML = "";
-                    areas.forEach(area => {
-                        const option = document.createElement("option");
-                        option.value = area;
-                        option.textContent = area;
-                        select.appendChild(option);
-                    });
-                })
-                .catch(error => console.error("error fetching areas", error));
-        }
-
-        document.addEventListener('DOMContentLoaded', fetchAreas);
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const logConsumptionButton = document.querySelector('button:nth-of-type(2)');
-
-            logConsumptionButton.addEventListener('click', function() {
-                const table = document.getElementById('itemTable');
-                const rows = table.rows;
-                const items = [];
-
-                for (let i = 1; i < rows.length; i++) {
-                    const itemName = rows[i].cells[1].querySelector('input').value;
-                    const itemCode = rows[i].cells[2].querySelector('input').value;
-                    const quantity = rows[i].cells[3].querySelector('input').value;
-                    const unit = rows[i].cells[4].querySelector('select').value;
-                    items.push({
-                        'Item Name': itemName,
-                        'Item Code': itemCode,
-                        'Quantity': quantity,
-                        'Unit': unit
-                    });
-                }
-
-                const date = document.querySelector('input[name="date"]').value;
-                const area = document.querySelector('.controls select').value;
-                const incharge = document.querySelectorAll('.controls input[type="text"]')[0].value;
-                const shift = document.querySelectorAll('.controls select')[1].value;
-                const receiver = document.querySelectorAll('.controls input[type="text"]')[1].value;
-                const contractor = document.querySelectorAll('.controls input[type="text"]')[2].value;
-
-                const data = {
-                    items: items,
-                    Date: date,
-                    'Consumed Area': area,
-                    'Area-Incharge': incharge,
-                    Shift: shift,
-                    Receiver: receiver,
-                    Contractor: contractor
-                };
-
-                fetch('/log-consumption', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                })
-                .then(response => response.json())
-                .then(result => {
-                    console.log('Success:', result);
-                    alert('Consumption logged successfully!');
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Failed to log consumption. Please try again.');
                 });
+            })
+            .catch(error => console.error('Error fetching item names:', error));
+    });
+
+    function fetchAreas(){
+        fetch('/get-areas')
+            .then(response => response.json())
+            .then(areas => {
+                const select = document.querySelector(".controls select");
+                select.innerHTML = "";
+                areas.forEach(area => {
+                    const option = document.createElement("option");
+                    option.value = area;
+                    option.textContent = area;
+                    select.appendChild(option);
+                });
+            })
+            .catch(error => console.error("error fetching areas", error));
+    }
+
+    document.addEventListener('DOMContentLoaded', fetchAreas);
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const logConsumptionButton = document.querySelector('button:nth-of-type(2)');
+
+        logConsumptionButton.addEventListener('click', function() {
+            const table = document.getElementById('itemTable');
+            const rows = table.rows;
+            const items = [];
+
+            for (let i = 1; i < rows.length; i++) {
+                const itemName = rows[i].cells[1].querySelector('input').value;
+                const itemCode = rows[i].cells[2].querySelector('input').value;
+                const quantity = rows[i].cells[3].querySelector('input').value;
+                const unit = rows[i].cells[4].querySelector('select').value;
+                items.push({
+                    'Item Name': itemName,
+                    'Item Code': itemCode,
+                    'Quantity': quantity,
+                    'Unit': unit
+                });
+            }
+
+            const date = document.querySelector('input[name="date"]').value;
+            const area = document.querySelector('.controls select').value;
+            const incharge = document.querySelectorAll('.controls input[type="text"]')[0].value;
+            const shift = document.querySelectorAll('.controls select')[1].value;
+            const receiver = document.querySelectorAll('.controls input[type="text"]')[1].value;
+            const contractor = document.querySelectorAll('.controls input[type="text"]')[2].value;
+
+            const data = {
+                items: items,
+                Date: date,
+                'Consumed Area': area,
+                'Area-Incharge': incharge,
+                Shift: shift,
+                Receiver: receiver,
+                Contractor: contractor
+            };
+
+            fetch('/log-consumption', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                console.log('Success:', result);
+                alert('Consumption logged successfully!');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to log consumption. Please try again.');
             });
         });
+    });
 
-        document.addEventListener('DOMContentLoaded', function() {
-            const resetButton = document.querySelector('button:nth-of-type(3)');
+    document.addEventListener('DOMContentLoaded', function() {
+        const resetButton = document.querySelector('button:nth-of-type(3)');
 
-            resetButton.addEventListener('click', function() {
-                document.querySelector('input[name="date"]').value = '';
-                const itemRows = document.querySelectorAll('#itemTable tr');
-                for (let i = 1; i < itemRows.length; i++) {
-                    itemRows[i].cells[1].querySelector('input').value = '';
-                    itemRows[i].cells[2].querySelector('input').value = '';
-                    itemRows[i].cells[3].querySelector('input').value = '';
-                }
-                const selects = document.querySelectorAll('.controls select');
-                selects.forEach(select => select.selectedIndex = 0);
-                const textInputs = document.querySelectorAll('.controls input[type="text"]');
-                textInputs.forEach(input => input.value = '');
-            });
+        resetButton.addEventListener('click', function() {
+            document.querySelector('input[name="date"]').value = '';
+            const itemRows = document.querySelectorAll('#itemTable tr');
+            for (let i = 1; i < itemRows.length; i++) {
+                itemRows[i].cells[1].querySelector('input').value = '';
+                itemRows[i].cells[2].querySelector('input').value = '';
+                itemRows[i].cells[3].querySelector('input').value = '';
+            }
+            const selects = document.querySelectorAll('.controls select');
+            selects.forEach(select => select.selectedIndex = 0);
+            const textInputs = document.querySelectorAll('.controls input[type="text"]');
+            textInputs.forEach(input => input.value = '');
         });
-    </script>
-</head>
-<body>
-    <div class="container">
-        <h2>Material Requisition Slip</h2>
-        <label>Date: <input type="date" name="date"></label>
-        <table id="itemTable">
-            <tr>
-                <th>S.L NO</th>
-                <th>Item Name</th>
-                <th>Item Code</th>
-                <th>Quantity</th>
-                <th>Unit</th>
-            </tr>
-            <tr>
-                <td>1</td>
-                <td><input type="text" name="item_name" list="item-names"></td>
-                <td><input type="text" name="item_code"></td>
-                <td><input type="number" name="quantity"></td>
-                <td><select name="unit"><option value="kg">Kg</option><option value="litre">Litre</option><option value='Meter'>Meter</option><option value='Nos'>Nos</option></select></td>
-            </tr>
-        </table>
-        <button onclick="addRow()">ADD MORE ITEMS</button>
-        <div class="controls">
-            <label>Area: <select><option>PUMP HOUSE</option><option>RO PLANT</option><option>GASZONE</option><option>FURNACE</option><option>MATERIAL HANDLING</option><option>ELECTRICAL</option><option>OPERATION</option></select></label>
-            <label>Incharge Name: <input type="text"></label>
-            <label>Shift: <select><option>A</option><option>B</option><option>C</option></select></label>
-            <label>Receiver: <input type="text"></label>
-            <label>Contractor: <input type="text"></label>
-        </div>
-        <button>LOG CONSUMPTION</button>
-        <button>RESET</button>
-    </div>
-</body>
-</html>
+    });
+</script>
