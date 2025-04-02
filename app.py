@@ -36,14 +36,15 @@ def user():
     return render_template('user.html')
 
 # API to get items from inventory
-@app.route('/get-items', methods=['GET'])
-def get_items():
+@app.route('/get-item-names', methods=['GET'])
+def get_item_names():
     try:
-        items_data = inventory_sheet.get_all_records()
-        print("Fetched Items:", items_data)  # Debugging line
-        return jsonify(items_data)
+        inventory_sheet = sh.worksheet("Inventory")
+        inventory_data = inventory_sheet.get_all_records()
+        item_names = [row["Item Name"] for row in inventory_data]
+        return jsonify(item_names)
     except Exception as e:
-        print("Error fetching items:", str(e))
+        print("Error fetching item names:", str(e))
         return jsonify({"error": str(e)}), 500
 
 
