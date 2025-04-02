@@ -46,31 +46,37 @@ def get_item_names():
     except Exception as e:
         print("Error fetching item names:", str(e))
         return jsonify({"error": str(e)}), 500
-
+        
+@app.route('/get-areas', methods=['GET'])
+def get_areas():
+    try:
+        records = consumption_sheet.get_all_records()
+        areas = set(record.get("Consumed Area", "").strip() for record in records)
+        return jsonify(list(areas))
+    except Exception as e:
+        print("Error fetching areas:", str(e))
+        return jsonify({"error": str(e)}), 500
 
 # API to get consumption history
 @app.route('/consumption-history', methods=['GET'])
 def get_consumption_history():
     try:
         records = consumption_sheet.get_all_records()
-        print("Fetched Consumption Records:", records)  # Debugging line
+        print("Fetched Consumption Records:", records)
 
-        # Extract query parameters
         area_filter = request.args.get("area", "").strip()
         date_filter = request.args.get("date", "").strip()
 
-        # Check if column names are correct
         if not records or "Consumed Area" not in records[0] or "Date" not in records[0]:
             return jsonify({"error": "Column names mismatch in Google Sheet"}), 500
 
-        # Filter records based on area & date
         filtered_records = [
             record for record in records
             if (not area_filter or record.get("Consumed Area", "").strip() == area_filter)
             and (not date_filter or record.get("Date", "").strip() == date_filter)
         ]
 
-        print("Filtered Consumption Records:", filtered_records)  # Debugging
+        print("Filtered Consumption Records:", filtered_records)
         return jsonify(filtered_records)
 
     except Exception as e:
