@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consumption History</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: white;
+            text-align: center;
+        }
+        .container {
+            width: 90%;
+            margin: auto;
+            border: 2px solid #444;
+            padding: 20px;
+            background-color: #1e1e1e;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #2a2a2a;
+        }
+        th, td {
+            border: 1px solid #444;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #333;
+        }
+        select, input {
+            padding: 8px;
+            background-color: #333;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Consumption History</h2>
+        <div>
+            <label>Date: <input type="date" id="filterDate"></label>
+            <label>Consumed Area: 
+                <select id="filterArea">
+                    <option value="">All</option>
+                    <option>PUMP HOUSE</option> 
+                    <option>RO PLANT</option>
+                    <option>GASZONE</option>
+                    <option>FURNACE</option>
+                    <option>MATERIAL HANDLING</option>
+                    <option>ELECTRICAL</option>
+                    <option>OPERATION</option>
+                </select>
+            </label>
+            <button onclick="filterRecords()">Filter</button>
+        </div>
+        <table id="historyTable">
+            <tr>
+                <th>Date</th>
+                <th>Item Name</th>
+                <th>Item Code</th>
+                <th>Quantity</th>
+                <th>Unit</th>
+                <th>Consumed Area</th>
+                <th>Shift</th>
+                <th>Area Incharge</th>
+                <th>Receiver</th>
+                <th>Contractor</th>
+            </tr>
+        </table>
+        <button onclick="downloadData()">Download CSV</button>
+    </div>
+
+    <script>
+        function filterRecords() {
+            let date = document.getElementById("filterDate").value;
+            let area = document.getElementById("filterArea").value;
+            
+            let table = document.getElementById("historyTable");
+            let rows = table.getElementsByTagName("tr");
+            
+            for (let i = 1; i < rows.length; i++) {
+                let cells = rows[i].getElementsByTagName("td");
+                let rowDate = cells[0]?.innerText;
+                let rowArea = cells[5]?.innerText;
+                
+                let match = true;
+                if (date && rowDate !== date) match = false;
+                if (area && rowArea !== area) match = false;
+                
+                rows[i].style.display = match ? "" : "none";
+            }
+        }
+        
+        function downloadData() {
+            let table = document.getElementById("historyTable");
+            let rows = table.getElementsByTagName("tr");
+            let csvContent = "data:text/csv;charset=utf-8,";
+            
+            for (let row of rows) {
+                let cells = row.getElementsByTagName("td");
+                let rowData = [];
+                for (let cell of cells) {
+                    rowData.push(cell.innerText);
+                }
+                csvContent += rowData.join(",") + "\n";
+            }
+            
+            let encodedUri = encodeURI(csvContent);
+            let link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "consumption_history.csv");
+            document.body.appendChild(link);
+            link.click();
+        }
+    </script>
+</body>
+</html>
