@@ -127,7 +127,25 @@ def log_tool():
         return jsonify({"message": "Tool logged successfully!"})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+        
+@app.route('/get-consumption-names', methods=['GET'])
+def get_consumption_names():
+    try:
+        records = consumption_sheet.get_all_records()
+        names = []
+        for record in records:
+            if "Area-Incharge" in record and record["Area-Incharge"]:
+                names.append(record["Area-Incharge"].strip())
+            if "Receiver" in record and record["Receiver"]:
+                names.append(record["Receiver"].strip())
+            if "Contractor" in record and record["Contractor"]:
+                names.append(record["Contractor"].strip())
 
+        unique_names = list(set(names))
+        return jsonify(unique_names)
+    except Exception as e:
+        print("Error fetching consumption names:", str(e))
+        return jsonify({"error": str(e)}), 500
 # Modify Tool Status
 @app.route('/modify-tool-status', methods=['POST'])
 def modify_tool_status():
