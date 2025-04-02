@@ -76,6 +76,31 @@
             <td><input type='text' name='item_code'></td>
             <td><input type='number' name='quantity'></td>
             <td><select name='unit'><option value='kg'>Kg</option><option value='litre'>Litre</option><option value='Meter'>Meter</option><option value='Nos'>Nos</option></select></td>`;
+
+        // Add event listener to the newly created item name input
+        const itemNameInput = row.querySelector('input[name="item_name"]');
+        itemNameInput.addEventListener('change', function() {
+            const itemName = this.value;
+            const itemCodeInput = row.querySelector('input[name="item_code"]');
+
+            if (itemName) {
+                fetch(`/get-item-code?item_name=${encodeURIComponent(itemName)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.item_code) {
+                            itemCodeInput.value = data.item_code;
+                        } else {
+                            itemCodeInput.value = '';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching item code:', error);
+                        itemCodeInput.value = '';
+                    });
+            } else {
+                itemCodeInput.value = '';
+            }
+        });
     }
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -93,7 +118,7 @@
                         datalist.appendChild(option);
                     });
                     input.setAttribute("list", "item-names");
-                    input.addEventListener('change', function() { // Use 'change' event
+                    input.addEventListener('change', function() {
                         const itemName = this.value;
                         const row = this.closest('tr');
                         const itemCodeInput = row.querySelector('input[name="item_code"]');
@@ -146,12 +171,18 @@
             const table = document.getElementById('itemTable');
             const rows = table.rows;
             const items = [];
+            let allFieldsFilled = true; // Validation flag
 
             for (let i = 1; i < rows.length; i++) {
                 const itemName = rows[i].cells[1].querySelector('input').value;
                 const itemCode = rows[i].cells[2].querySelector('input').value;
                 const quantity = rows[i].cells[3].querySelector('input').value;
                 const unit = rows[i].cells[4].querySelector('select').value;
+
+                if (!itemName || !itemCode || !quantity || !unit) {
+                    allFieldsFilled = false;
+                }
+
                 items.push({
                     'Item Name': itemName,
                     'Item Code': itemCode,
@@ -166,6 +197,15 @@
             const shift = document.querySelectorAll('.controls select')[1].value;
             const receiver = document.querySelectorAll('.controls input[type="text"]')[1].value;
             const contractor = document.querySelectorAll('.controls input[type="text"]')[2].value;
+
+            if (!date || !area || !incharge || !shift || !receiver || !contractor) {
+                allFieldsFilled = false;
+            }
+
+            if (!allFieldsFilled) {
+                alert("Please fill in all fields.");
+                return; // Stop the consumption log
+            }
 
             const data = {
                 items: items,
