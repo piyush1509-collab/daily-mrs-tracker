@@ -90,114 +90,66 @@
     </div>
 
     <script>
-        function filterRecords() {
-            const date = document.getElementById('filterDate').value;
-            const area = document.getElementById('filterArea').value;
-            fetchConsumptionHistory(date, area);
-        }
-
-        function fetchConsumptionHistory(date = '', area = '') {
-            let url = '/consumption-history';
-            if (date || area) {
-                url += "?";
-                if (date) {
-                    url += `date=${date}&`;
-                }
-                if (area) {
-                    url += `area=${area}`;
-                }
+    function fetchConsumptionHistory(date = '', area = '') {
+        let url = '/consumption-history';
+        if (date || area) {
+            url += "?";
+            if (date) {
+                url += `date=${date}&`;
             }
-
-            fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    const table = document.getElementById('historyTable');
-                    table.innerHTML = `
-                        <tr>
-                            <th>Date</th>
-                            <th>Item Name</th>
-                            <th>Item Code</th>
-                            <th>Quantity</th>
-                            <th>Unit</th>
-                            <th>Consumed Area</th>
-                            <th>Shift</th>
-                            <th>Area Incharge</th>
-                            <th>Receiver</th>
-                            <th>Contractor</th>
-                        </tr>
-                    `;
-
-                    // Maintain the column order from the older code, adjust keys if needed.
-                    const columnOrder = ['Date', 'Item Name', 'Item Code', 'Quantity', 'Unit', 'Consumed Area', 'Shift', 'Area-Incharge', 'Receiver', 'Contractor']; // Adjust keys if necessary
-
-                    data.forEach(record => {
-                        const row = table.insertRow();
-                        columnOrder.forEach(key => {
-                            const cell = row.insertCell();
-                            cell.textContent = record[key];
-                        });
-                    });
-                })
-                .catch(error => console.error('Error fetching consumption history:', error));
-        }
-
-        function downloadData() {
-            let table = document.getElementById("historyTable");
-            let rows = table.getElementsByTagName("tr");
-            let csvContent = "data:text/csv;charset=utf-8,";
-
-            for (let row of rows) {
-                let cells = row.getElementsByTagName("td");
-                let rowData = [];
-                for (let cell of cells) {
-                    rowData.push(cell.innerText);
-                }
-                csvContent += rowData.join(",") + "\n";
+            if (area) {
+                url += `area=${area}`;
             }
-
-            let encodedUri = encodeURI(csvContent);
-            let link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "consumption_history.csv");
-            document.body.appendChild(link);
-            link.click();
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            fetch('/consumption-history')
-                .then(response => response.json())
-                .then(data => {
-                    const table = document.getElementById('historyTable');
-                    // Maintain the column order from the older code, adjust keys if needed.
-                    const columnOrder = ['Date', 'Item Name', 'Item Code', 'Quantity', 'Unit', 'Consumed Area', 'Shift', 'Area-Incharge', 'Receiver', 'Contractor']; // Adjust keys if necessary
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                console.log("Fetched Data:", data); // Debugging step
+                
+                const table = document.getElementById('historyTable');
+                table.innerHTML = `
+                    <tr>
+                        <th>Date</th>
+                        <th>Item Name</th>
+                        <th>Item Code</th>
+                        <th>Quantity</th>
+                        <th>Unit</th>
+                        <th>Consumed Area</th>
+                        <th>Shift</th>
+                        <th>Area Incharge</th>
+                        <th>Receiver</th>
+                        <th>Contractor</th>
+                    </tr>
+                `;
 
-                    data.forEach(record => {
-                        const row = table.insertRow();
-                        columnOrder.forEach(key => {
-                            const cell = row.insertCell();
-                            cell.textContent = record[key];
-                        });
+                const columnOrder = {
+                    "Date": "date",
+                    "Item Name": "item_name",  // Changed from "Item Name"
+                    "Item Code": "item_code",  // Changed from "Item Code"
+                    "Quantity": "quantity",
+                    "Unit": "unit",
+                    "Consumed Area": "consumed_area",
+                    "Shift": "shift",
+                    "Area Incharge": "area_incharge",
+                    "Receiver": "receiver",
+                    "Contractor": "contractor"
+                };
+
+                data.forEach(record => {
+                    const row = table.insertRow();
+                    Object.keys(columnOrder).forEach(key => {
+                        const cell = row.insertCell();
+                        cell.textContent = record[columnOrder[key]] || "N/A"; // Default to "N/A" if missing
                     });
-                })
-                .catch(error => console.error('Error fetching consumption history:', error));
-        });
+                });
+            })
+            .catch(error => console.error('Error fetching consumption history:', error));
+    }
 
-        function fetchAreas() {
-            fetch('/get-areas')
-                .then(response => response.json())
-                .then(areas => {
-                    const select = document.getElementById("filterArea");
-                    areas.forEach(area => {
-                        const option = document.createElement("option");
-                        option.value = area;
-                        option.textContent = area;
-                        select.appendChild(option);
-                    });
-                })
-                .catch(error => console.error("error fetching areas", error));
-        }
-
-        document.addEventListener('DOMContentLoaded', fetchAreas);
-    </script>
+    document.addEventListener('DOMContentLoaded', function() {
+        fetchConsumptionHistory();
+    });
+</script>
 </body>
 </html>
