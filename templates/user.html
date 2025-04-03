@@ -24,57 +24,80 @@
             </select>
         </div>
         
-       <table class="min-w-full bg-gray-800 rounded-lg mt-4">
-    <thead>
-        <tr class="text-left border-b border-gray-700">
-            <th class="p-3">Tool Name</th>
-            <th class="p-3">Area</th>
-            <th class="p-3">In-Charge</th>
-            <th class="p-3">Receiver Name</th>
-            <th class="p-3">Contractor Name</th>
-            <th class="p-3">Date Issued</th>
-            <th class="p-3">Status</th>
-        </tr>
-    </thead>
-    <tbody id="userPendingToolsTable" class="text-gray-300"></tbody>
-</table>
+        <table class="min-w-full bg-gray-800 rounded-lg mt-4">
+            <thead>
+                <tr class="text-left border-b border-gray-700">
+                    <th class="p-3">Tool Name</th>
+                    <th class="p-3">Area</th>
+                    <th class="p-3">In-Charge</th>
+                    <th class="p-3">Receiver Name</th>
+                    <th class="p-3">Contractor Name</th>
+                    <th class="p-3">Date Issued</th>
+                    <th class="p-3">Status</th>
+                </tr>
+            </thead>
+            <tbody id="userPendingToolsTable" class="text-gray-300"></tbody>
+        </table>
+
+        <button onclick="downloadCSV()" class="bg-indigo-500 px-4 py-2 rounded-lg mt-4 hover:bg-indigo-600">Download CSV</button>
 
     </div>
 
     <script>
-      function fetchUserPendingTools() {
-    let area = document.getElementById("areaFilter").value;
+        function fetchUserPendingTools() {
+            let area = document.getElementById("areaFilter").value;
 
-    fetch(`/get-pending-tools?area=${encodeURIComponent(area)}`)
-    .then(response => response.json())
-    .then(data => {
-        let tableBody = document.getElementById("userPendingToolsTable");
-        tableBody.innerHTML = "";
+            fetch(`/get-pending-tools?area=${encodeURIComponent(area)}`)
+                .then(response => response.json())
+                .then(data => {
+                    let tableBody = document.getElementById("userPendingToolsTable");
+                    tableBody.innerHTML = "";
 
-        data.forEach(row => {
-            let status = row["Status"] || "N/A";  // ✅ Ensure status is not undefined
-            let newRow = `<tr>
-                <td class="p-3">${row["Tool Name"]}</td>
-                <td class="p-3">${row["Area"]}</td>
-                <td class="p-3">${row["In-Charge"]}</td>
-                <td class="p-3">${row["Receiver Name"]}</td>
-                <td class="p-3">${row["Contractor Name"]}</td>
-                <td class="p-3">${row["Date Issued"]}</td>
-                <td class="p-3">${status}</td>
-            </tr>`;
-            tableBody.innerHTML += newRow;
-        });
-    })
-    .catch(error => console.error("Error fetching user pending tools:", error));
-}
+                    data.forEach(row => {
+                        let status = row["Status"] || "N/A";
+                        let newRow = `<tr>
+                            <td class="p-3">${row["Tool Name"]}</td>
+                            <td class="p-3">${row["Area"]}</td>
+                            <td class="p-3">${row["In-Charge"]}</td>
+                            <td class="p-3">${row["Receiver Name"]}</td>
+                            <td class="p-3">${row["Contractor Name"]}</td>
+                            <td class="p-3">${row["Date Issued"]}</td>
+                            <td class="p-3">${status}</td>
+                        </tr>`;
+                        tableBody.innerHTML += newRow;
+                    });
+                })
+                .catch(error => console.error("Error fetching user pending tools:", error));
+        }
 
-// Reload tools list when the filter is changed
-document.getElementById("areaFilter").addEventListener("change", fetchUserPendingTools);
+        document.getElementById("areaFilter").addEventListener("change", fetchUserPendingTools);
+        window.onload = fetchUserPendingTools;
 
-// Load pending tools when the page opens
-window.onload = fetchUserPendingTools;
+        function downloadCSV() {
+            let table = document.getElementById("userPendingToolsTable");
+            let rows = table.getElementsByTagName("tr");
+            let csvContent = "data:text/csv;charset=utf-8,";
 
+            // Add headers
+            let headers = ["Tool Name", "Area", "In-Charge", "Receiver Name", "Contractor Name", "Date Issued", "Status"];
+            csvContent += headers.join(",") + "\n";
 
+            for (let row of rows) {
+                let cells = row.getElementsByTagName("td");
+                let rowData = [];
+                for (let cell of cells) {
+                    rowData.push(cell.innerText);
+                }
+                csvContent += rowData.join(",") + "\n";
+            }
+
+            let encodedUri = encodeURI(csvContent);
+            let link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "user_pending_tools.csv");
+            document.body.appendChild(link);
+            link.click();
+        }
     </script>
 </body>
 </html>
