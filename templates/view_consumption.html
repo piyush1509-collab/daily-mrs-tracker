@@ -89,17 +89,13 @@
         <button onclick="downloadData()">Download CSV</button>
     </div>
 
-    <script>
+   <script>
     function fetchConsumptionHistory(date = '', area = '') {
         let url = '/consumption-history';
         if (date || area) {
             url += "?";
-            if (date) {
-                url += `date=${date}&`;
-            }
-            if (area) {
-                url += `area=${area}`;
-            }
+            if (date) url += `date=${date}&`;
+            if (area) url += `area=${area}`;
         }
 
         fetch(url)
@@ -123,33 +119,32 @@
                     </tr>
                 `;
 
+                // Match API response keys correctly
                 const columnOrder = {
                     "Date": "date",
-                    "Item Name": "item_name",  // Changed from "Item Name"
-                    "Item Code": "item_code",  // Changed from "Item Code"
-                    "Quantity": "quantity",
+                    "Item Name": "name",
+                    "Item Code": "code",
+                    "Quantity": "qty",
                     "Unit": "unit",
-                    "Consumed Area": "consumed_area",
+                    "Consumed Area": "area",
                     "Shift": "shift",
-                    "Area Incharge": "area_incharge",
+                    "Area Incharge": "incharge",
                     "Receiver": "receiver",
                     "Contractor": "contractor"
                 };
 
                 data.forEach(record => {
                     const row = table.insertRow();
-                    Object.keys(columnOrder).forEach(key => {
+                    Object.values(columnOrder).forEach(key => {
                         const cell = row.insertCell();
-                        cell.textContent = record[columnOrder[key]] || "N/A"; // Default to "N/A" if missing
+                        cell.textContent = record[key] ?? "N/A"; // Show "N/A" if missing
                     });
                 });
             })
             .catch(error => console.error('Error fetching consumption history:', error));
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
-        fetchConsumptionHistory();
-    });
+    document.addEventListener('DOMContentLoaded', fetchConsumptionHistory);
 </script>
 </body>
 </html>
