@@ -98,11 +98,23 @@
             if (area) url += `area=${area}`;
         }
 
+        console.log("Fetching from URL:", url); // Debugging step
+
         fetch(url)
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
                 console.log("Fetched Data:", data); // Debugging step
-                
+
+                if (!Array.isArray(data) || data.length === 0) {
+                    console.warn("No data received from API!");
+                    return;
+                }
+
                 const table = document.getElementById('historyTable');
                 table.innerHTML = `
                     <tr>
@@ -119,7 +131,6 @@
                     </tr>
                 `;
 
-                // Match API response keys correctly
                 const columnOrder = {
                     "Date": "date",
                     "Item Name": "name",
@@ -137,7 +148,7 @@
                     const row = table.insertRow();
                     Object.values(columnOrder).forEach(key => {
                         const cell = row.insertCell();
-                        cell.textContent = record[key] ?? "N/A"; // Show "N/A" if missing
+                        cell.textContent = record[key] ?? "N/A"; // Default to "N/A" if missing
                     });
                 });
             })
