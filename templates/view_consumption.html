@@ -89,32 +89,28 @@
         <button onclick="downloadData()">Download CSV</button>
     </div>
 
-   <script>
+    <script>
+    function filterRecords() {
+        const date = document.getElementById('filterDate').value;
+        const area = document.getElementById('filterArea').value;
+        fetchConsumptionHistory(date, area);
+    }
+
     function fetchConsumptionHistory(date = '', area = '') {
         let url = '/consumption-history';
         if (date || area) {
             url += "?";
-            if (date) url += `date=${date}&`;
-            if (area) url += `area=${area}`;
+            if (date) {
+                url += `date=${date}&`;
+            }
+            if (area) {
+                url += `area=${area}`;
+            }
         }
 
-        console.log("Fetching from URL:", url); // Debugging step
-
         fetch(url)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
-                console.log("Fetched Data:", data); // Debugging step
-
-                if (!Array.isArray(data) || data.length === 0) {
-                    console.warn("No data received from API!");
-                    return;
-                }
-
                 const table = document.getElementById('historyTable');
                 table.innerHTML = `
                     <tr>
@@ -131,31 +127,73 @@
                     </tr>
                 `;
 
-                const columnOrder = {
-                    "Date": "date",
-                    "Item Name": "name",
-                    "Item Code": "code",
-                    "Quantity": "qty",
-                    "Unit": "unit",
-                    "Consumed Area": "area",
-                    "Shift": "shift",
-                    "Area Incharge": "incharge",
-                    "Receiver": "receiver",
-                    "Contractor": "contractor"
-                };
-
-                data.forEach(record => {
-                    const row = table.insertRow();
-                    Object.values(columnOrder).forEach(key => {
-                        const cell = row.insertCell();
-                        cell.textContent = record[key] ?? "N/A"; // Default to "N/A" if missing
+                if (Array.isArray(data)) {
+                    data.forEach(record => {
+                        const row = table.insertRow();
+                        row.insertCell().textContent = record.Date || 'N/A';
+                        row.insertCell().textContent = record['Item Name'] || record['Item name'] || 'N/A';
+                        row.insertCell().textContent = record['Item Code'] || record['Item code'] || 'N/A';
+                        row.insertCell().textContent = record.Quantity || 'N/A';
+                        row.insertCell().textContent = record.Unit || 'N/A';
+                        row.insertCell().textContent = record['Consumed Area'] || 'N/A';
+                        row.insertCell().textContent = record.Shift || 'N/A';
+                        row.insertCell().textContent = record['Area-Incharge'] || 'N/A';
+                        row.insertCell().textContent = record.Receiver || 'N/A';
+                        row.insertCell().textContent = record.Contractor || 'N/A';
                     });
-                });
+                } else {
+                    table.innerHTML = `
+                        <tr>
+                            <td colspan="10">No data found.</td>
+                        </tr>
+                    `;
+                }
             })
             .catch(error => console.error('Error fetching consumption history:', error));
     }
 
-    document.addEventListener('DOMContentLoaded', fetchConsumptionHistory);
+    function downloadData() {
+        let table = document.getElementById("historyTable");
+        let rows = table.getElementsByTagName("tr");
+        let csvContent = "data:text/csv;charset=utf-8,";
+
+        for (let row of rows) {
+            let cells = row.getElementsByTagName("td");
+            let rowData = [];
+            for (let cell of cells) {
+                rowData.push(cell.innerText);
+            }
+            csvContent += rowData.join(",") + "\n";
+        }
+
+        let encodedUri = encodeURI(csvContent);
+        let link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "consumption_history.csv");
+        document.body.appendChild(link);
+        link.click();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        fetchConsumptionHistory(); // Load all data on page load
+    });
+
+    function fetchAreas() {
+        fetch('/get-areas')
+            .then(response => response.json())
+            .then(areas => {
+                const select = document.getElementById("filterArea");
+                areas.forEach(area => {
+                    const option = document.createElement("option");
+                    option.value = area;
+                    option.textContent = area;
+                    select.appendChild(option);
+                });
+            })
+            .catch(error => console.error("error fetching areas", error));
+    }
+
+    document.addEventListener('DOMContentLoaded', fetchAreas);
 </script>
 </body>
 </html>
