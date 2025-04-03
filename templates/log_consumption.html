@@ -283,13 +283,19 @@
         }
 
         document.addEventListener('DOMContentLoaded', fetchAndSuggestNames);
+        
+document.addEventListener("DOMContentLoaded", function () {
+    const dateInput = document.getElementById("dateInput");
+    const today = new Date().toISOString().split("T")[0]; // Get current date in YYYY-MM-DD format
+    dateInput.value = today; // Set default date
+});
 
     </script>
 </head>
 <body>
     <div class="container">
         <h2>Material Requisition Slip</h2>
-        <label>Date: <input type="date" name="date"></label>
+        <label>Date: <input type="date" name="date" id="dateInput"></label>
         <table id="itemTable">
             <tr>
                 <th>S.L NO</th>
